@@ -3,14 +3,27 @@
   "version": "0.0.1",
   "description": "React viewpager component for Web",
   "main": "build/index.js",
-  "module": "build/index.es.js",
-  "jsnext:main": "build/index.es.js",
   "types": "build/index.d.ts",
   "scripts": {
     "test": "jest",
     "build": "rollup -c"
   },
-  "author": "tjbroodryk1@gmail.com",
+  "author": {
+    "name": "Tj Broodryk",
+    "email": "tjbroodryk1@gmail.com",
+    "url": "https://tjbroodryk.co.uk"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/TjaartBroodryk/react-web-view-pager"
+  },
+  "keywords": [
+    "viewpager",
+    "react",
+    "pwa",
+    "pagesnap",
+    "custom"
+  ],
   "license": "ISC",
   "peerDependencies": {
     "react": "^16.13.0",
