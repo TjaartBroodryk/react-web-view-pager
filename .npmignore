@@ -1,2 +1,8 @@
 .gitignore
 rollup.config.js
+.vscode
+node_modules/
+tests
+src
+rollup.config.js
+tsconfig.json
