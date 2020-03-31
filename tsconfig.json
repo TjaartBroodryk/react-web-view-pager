@@ -1,6 +1,6 @@
 {
     "compilerOptions": {
-      "outDir": "build",
+      "declarationDir": "build",
       "module": "esnext",
       "target": "es5",
       "lib": [
@@ -8,7 +8,7 @@
         "dom.iterable",
         "esnext"
       ],
-      "sourceMap": false,
+      "sourceMap": true,
       "allowJs": true,
       "jsx": "react",
       "declaration": true,
