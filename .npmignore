@@ -6,3 +6,4 @@ tests
 src
 rollup.config.js
 tsconfig.json
+.babelrc
