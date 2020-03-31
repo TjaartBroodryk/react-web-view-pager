@@ -1,33 +1,13 @@
-function easeInOutQuad(t: number) {
+import { Configuration } from './configuration';
+
+const easeInOutQuad = (t: number): number => {
   return t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t
 }
 
 const TIMEOUT_DEFAULT = 100
 const DURATION_DEFAULT = 300
 const EASING_DEFAULT = easeInOutQuad
-const NOOP = () => {}
-
-interface ScrollSnapConfiguration {
-  /**
-   * time in ms after which scrolling is considered finished
-   **/
-  timeout?: number
-  /**
-   * duration in ms for the smooth snap
-   **/
-  duration?: number
-  /**
-   * custom easing function
-   * @param t normalized time typically in the range [0, 1]
-   **/
-  easing?: (t: number) => number
-
-  /**
-   * additional offset
-   * @param t e.g. '10px' or '2rem' or 10 (when specifiyng as number, it will be treated as pixels)
-   **/
-  offset?: string | number
-}
+const NOOP = () => { }
 
 interface SnapLength {
   value: number
@@ -66,7 +46,7 @@ export default class Pager {
   }
   private animationFrame?: number = null
 
-  constructor(element: HTMLElement, config: ScrollSnapConfiguration, callback?: (currentItem: number) => void) {
+  constructor(element: HTMLElement, config: Configuration, callback?: (currentItem: number) => void) {
     if (config.timeout && (isNaN(config.timeout) || typeof config.timeout === 'boolean')) {
       throw new Error(
         `Optional config property 'timeout' is not valid, expected NUMBER but found ${(typeof config.timeout).toUpperCase()}`
@@ -94,7 +74,7 @@ export default class Pager {
     else if (String(config.offset)?.includes('rem')) {
       const value = Number(String(config.offset)?.replace('rem', ''));
 
-      if(!isNaN(value)) {
+      if (!isNaN(value)) {
         this.offset = this.convertRemToPixels(value)
       }
       else {
@@ -104,7 +84,7 @@ export default class Pager {
     else if (config.offset?.includes('px')) {
       const value = Number(config.offset.replace('px', ''));
 
-      if(!isNaN(value)) {
+      if (!isNaN(value)) {
         this.offset = value;
       }
       else {
@@ -115,13 +95,13 @@ export default class Pager {
     this.bindElement(element)
   }
 
-  private checkScrollSpeed(value: number, axis: 'x') {
+  private checkScrollSpeed = (value: number, axis: 'x') => {
     const clear = () => {
       this.lastScrollValue![axis] = undefined
     }
 
     const newValue = value
-    let delta : number
+    let delta: number
     if (this.lastScrollValue[axis] !== null) {
       delta = newValue - this.lastScrollValue[axis]!
     } else {
@@ -133,7 +113,7 @@ export default class Pager {
     return delta
   }
 
-  private bindElement(element: HTMLElement) {
+  private bindElement = (element: HTMLElement) => {
     this.target = element
     this.listenerElement = element === document.documentElement ? window : element
 
@@ -154,7 +134,7 @@ export default class Pager {
    * scroll handler
    * this is the callback for scroll events.
    */
-  private handler(target: HTMLElement) {
+  private handler = (target: HTMLElement) => {
     // if currently this.animating, stop it. this prevents flickering.
     if (this.animationFrame) {
       clearTimeout(this.animationFrame)
@@ -173,11 +153,12 @@ export default class Pager {
     this.scrollHandlerTimer = window.setTimeout(this.animationHandler, this.timeout)
   }
 
-  private animationHandler = () => {
+  /**
+   * Responsible for handling the "lifecycle" of the animation
+   */
+  private animationHandler = async () => {
     // if we don't move a thing, we can ignore the timeout: if we did, there'd be another timeout added for this.scrollStart+1.
-    if (
-      this.scrollStart?.x === this.target?.scrollLeft
-    ) {
+    if (this.scrollStart?.x === this.target?.scrollLeft) {
       // ignore timeout
       return
     }
@@ -195,12 +176,10 @@ export default class Pager {
     this.animating = true
 
     // smoothly move to the snap point
-    this.smoothScroll(this.target!, snapPoint, () => {
-      // after moving to the snap point, rebind the scroll event handler
-      this.animating = false
-      this.listenerElement?.addEventListener('scroll', this.startAnimation, false)
-      this.onAnimationEnd!(this.calculateCurrentIndex())
-    })
+    await this.smoothScroll(this.target!, snapPoint);
+    this.animating = false
+    this.listenerElement?.addEventListener('scroll', this.startAnimation, false)
+    this.onAnimationEnd!(this.calculateCurrentIndex())
 
     // we just jumped to the snapPoint, so this will be our next this.scrollStart
     if (!isNaN(snapPoint.x)) {
@@ -208,17 +187,23 @@ export default class Pager {
     }
   }
 
-  private calculateCurrentIndex() : number {
+  /**
+   * Calculates which "Page" is currently visible
+   */
+  private calculateCurrentIndex = (): number => {
     const width = this.getPagerWidth();
     const x = this.target!.scrollLeft + width;
     return (Math.round(x / width) - 1)
   }
 
-  private getPagerWidth() {
-    return  Math.round(this.getXSnapLength(this.target!, this.snapLengthUnit!.x));
+  /**
+   * Get the width of the viewpager element
+   */
+  private getPagerWidth = (): number => {
+    return Math.round(this.getXSnapLength(this.target!, this.snapLengthUnit!.x));
   }
 
-  private getNextSnapPoint(scrollView: HTMLElement, direction: Coords) {
+  private getNextSnapPoint = (scrollView: HTMLElement, direction: Coords): Coords => {
     // get snap length
     const snapLength = {
       x: Math.round(this.getXSnapLength(this.target!, this.snapLengthUnit!.x)),
@@ -247,7 +232,7 @@ export default class Pager {
     return scrollTo
   }
 
-  private roundByDirection(direction: number, currentPoint: number) {
+  private roundByDirection = (direction: number, currentPoint: number) => {
     if (direction === -1) {
       // when we go up, we floor the number to jump to the next snap-point in scroll direction
       return Math.floor(currentPoint)
@@ -256,7 +241,7 @@ export default class Pager {
     return Math.ceil(currentPoint)
   }
 
-  private stayInBounds(min: number, max: number, destined: number) {
+  private stayInBounds = (min: number, max: number, destined: number) => {
     return Math.max(Math.min(destined, max), min)
   }
 
@@ -265,7 +250,7 @@ export default class Pager {
    * @param scrollView 
    * @param declaration 
    */
-  private getXSnapLength(scrollView: HTMLElement, declaration: SnapLength) {
+  private getXSnapLength = (scrollView: HTMLElement, declaration: SnapLength) => {
     const offset = ((this.offset ?? 0) / 100)
     if (declaration.unit === 'vw') {
       // when using vw, one snap is the length of vw / 100 * value
@@ -286,7 +271,7 @@ export default class Pager {
    * Check when scroll coordinated is at the "edge" for the scrollview
    * @param coords current coordinates
    */
-  private isEdge(coords: Coords) {
+  private isEdge = (coords: Coords) => {
     return (coords.x === 0 && this.speedDeltaX === 0)
   }
 
@@ -296,7 +281,7 @@ export default class Pager {
    * @param end the desired end coordinates
    * @param callback called once the smooth scroll animation is finished
    */
-  private smoothScroll(scrollView: HTMLElement, end: Coords, callback: (end: Coords) => void) {
+  private smoothScroll = async (scrollView: HTMLElement, end: Coords): Promise<Coords> => {
     const position = (start: number, end: number, elapsed: number, duration: number) => {
       if (elapsed > duration) {
         return end
@@ -310,17 +295,10 @@ export default class Pager {
     }
 
     // get animation frame or a fallback
-    const requestAnimationFrame =
-      window.requestAnimationFrame ||
-      window.webkitRequestAnimationFrame ||
-      function(fn) {
-        return window.setTimeout(fn, 15)
-      }
     const duration = this.isEdge(start) ? 0 : this.duration
     let startTime: number
 
-    // setup the stepping function
-    function step(timestamp: number) {
+    const step = async (timestamp: number): Promise<Coords> => {
       if (!startTime) {
         startTime = timestamp
       }
@@ -333,27 +311,44 @@ export default class Pager {
 
       // check if we are over due;
       if (elapsed < duration!) {
-        requestAnimationFrame(step)
+        const timestamp: number = await this.nextFrame();
+        await step(timestamp);
       } else {
-          // stop execution and run the callback
-          return callback && callback(end)
+        // stop execution and run the callback
+        return new Promise(resolve => {
+          resolve(end);
+        })
       }
     }
-    this.animationFrame = requestAnimationFrame(step)
+
+    const timestamp: number = await this.nextFrame();
+    return await step(timestamp);
+  }
+
+  private nextFrame = (): Promise<number> => {
+    const requestAnimationFrame =
+      window.requestAnimationFrame ||
+      window.webkitRequestAnimationFrame ||
+      function (fn) {
+        return window.setTimeout(fn, 15)
+      }
+    return new Promise<number>(resolve => {
+      this.animationFrame = requestAnimationFrame(resolve)
+    });
   }
 
   /**
    * Converts a rem value to a px value
    * @param rem
    */
-  private convertRemToPixels(rem: number) {    
+  private convertRemToPixels = (rem: number) => {
     return rem * parseFloat(getComputedStyle(document.documentElement).fontSize);
   }
 
   /**
    * Removes the scroll listener
    */
-  unbind() {
+  unbind = (): void => {
     this.listenerElement?.removeEventListener('scroll', this.startAnimation, false)
   }
 
@@ -361,17 +356,16 @@ export default class Pager {
    * Snaps scroll view to a specific page
    * @param index page number
    */
-  snapTo(index: number) {
+  snapTo = async (index: number): Promise<void> => {
     this.listenerElement?.removeEventListener('scroll', this.startAnimation, false)
     this.animating = true;
-    const snapPoint = {x : this.getPagerWidth() * index, y: 0};
+    const snapPoint = { x: this.getPagerWidth() * index, y: 0 };
     this.speedDeltaX = 1;
     // smoothly move to the snap point
-    this.smoothScroll(this.target!, snapPoint, () => {
-      // after moving to the snap point, rebind the scroll event handler
-      this.animating = false
-      this.listenerElement?.addEventListener('scroll', this.startAnimation, false)
-      this.onAnimationEnd!(this.calculateCurrentIndex())
-    })
+    await this.smoothScroll(this.target!, snapPoint);
+    // after moving to the snap point, rebind the scroll event handler
+    this.animating = false
+    this.listenerElement?.addEventListener('scroll', this.startAnimation, false)
+    this.onAnimationEnd!(this.calculateCurrentIndex())
   }
 }
