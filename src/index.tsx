@@ -33,9 +33,8 @@ const ViewPager = ({ pages, onPageChanged, activePage, offset, timeout, duration
 
   React.useEffect(() => {
     if (doneScrolling.current) {
-      pager.current?.snapTo(activePage).then(() => {
-        doneScrolling.current = false;
-      });
+      doneScrolling.current = false;
+      pager.current?.snapTo(activePage);
     }
   }, [activePage, pager])
 

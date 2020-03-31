@@ -23,6 +23,10 @@ export default {
       sourcemap: true
     }
   ],
+  external: [
+    ...Object.keys(pkg.dependencies || {}),
+    ...Object.keys(pkg.peerDependencies || {}),
+  ],
   plugins: [
     babel({
       extensions: [
@@ -34,9 +38,7 @@ export default {
     external(),
     resolve(),
     typescript({
-      rollupCommonJSResolveHack: true,
-      exclude: "**/__tests__/**",
-      clean: true
+      typescript: require('typescript'),
     }),
     commonjs({
       include: ["node_modules/**"],

@@ -23,18 +23,18 @@ interface Coords {
 }
 
 export default class Pager {
-  private timeout?: number = null;
-  private duration?: number = null;
   private animating = false
-  private easing?: (t: number) => number = null
-  private offset?: number = null
-  private listenerElement?: HTMLElement | Window = null
-  private target?: HTMLElement = null
-  private onAnimationEnd?: (currentItem: number) => void = null
-  private scrollHandlerTimer?: number = null
-  private scrollSpeedTimer?: number = null
-  private scrollStart?: Coords = null
-  private speedDeltaX?: number = null
+  private duration?: number = null;
+  private timeout?: number = null;
+  private easing?: (t: number) => number = null;
+  private offset?: number = null;
+  private listenerElement?: HTMLElement | Window = null;
+  private target?: HTMLElement = null;
+  private onAnimationEnd?: (currentItem: number) => void = null;
+  private scrollHandlerTimer?: number = null;
+  private scrollSpeedTimer?: number = null;
+  private scrollStart?: Coords = null;
+  private speedDeltaX?: number = null;
   private snapLengthUnit: SnapCoord = {
     x: {
       value: 100,
@@ -44,7 +44,7 @@ export default class Pager {
   private lastScrollValue: Coords = {
     x: 0,
   }
-  private animationFrame?: number = null
+  private animationFrame?: number = null;
 
   constructor(element: HTMLElement, config: Configuration, callback?: (currentItem: number) => void) {
     if (config.timeout && (isNaN(config.timeout) || typeof config.timeout === 'boolean')) {
